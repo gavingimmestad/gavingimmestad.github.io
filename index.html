@@ -1,6 +1,72 @@
-<html>
-<div id="large-header" class="large-header">
-  <canvas id="demo-canvas"></canvas>
-    <h1 class="main-title">Hello<span class="thin">World</span></h1>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Climate Change</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #060b1a; overflow: hidden; height: 100vh; }
+    canvas { position: fixed; top: 0; left: 0; }
+    .content {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; pointer-events: none;
+      color: rgba(255,255,255,0.85); font-family: Georgia, serif;
+      font-size: 2rem; letter-spacing: 0.05em; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div class="content">Climate Change  <br> Drivers | Impacts | Personal Experience</div>
+
+  
+  <script>
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    const MOUSE = { x: -999, y: -999 };
+    const COUNT = 60;
+    let W, H, bubbles = [];
+
+    const rand = (min, max) => Math.random() * (max - min) + min;
+
+    function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+
+    function mkBubble() {
+      return { x: rand(0, W), y: rand(0, H), r: rand(6, 34), vx: rand(-0.2, 0.2), vy: rand(-0.6, -0.1), alpha: rand(0.05, 0.3) };
+    }
+
+    function init() { bubbles = Array.from({ length: COUNT }, mkBubble); }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (const b of bubbles) {
+        const dx = b.x - MOUSE.x, dy = b.y - MOUSE.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) { const f = (120 - dist) / 120; b.vx += dx / dist * f * 0.15; b.vy += dy / dist * f * 0.15; }
+        b.vx *= 0.97; b.vy *= 0.97;
+        b.x += b.vx; b.y += b.vy;
+        if (b.x < -b.r) b.x = W + b.r;
+        if (b.x > W + b.r) b.x = -b.r;
+        if (b.y < -b.r) { b.y = H + b.r; b.x = rand(0, W); }
+        if (b.y > H + b.r) b.y = -b.r;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(140,200,255,${b.alpha * 2})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('mousemove', e => { MOUSE.x = e.clientX; MOUSE.y = e.clientY; });
+    window.addEventListener('mouseleave', () => { MOUSE.x = MOUSE.y = -999; });
+    window.addEventListener('resize', () => { resize(); init(); });
+
+    resize(); init(); draw();
+	
+	
+  </script>
+</body>
 </html>
